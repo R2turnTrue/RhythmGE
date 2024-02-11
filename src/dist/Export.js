@@ -32,21 +32,39 @@ var Export = /** @class */ (function () {
         var _this = this;
         if (timestamps == null || timestamps.length < 1)
             return;
-        var dialog = require("electron").remote.dialog;
-        var showDialogPromise = dialog.showSaveDialog({ title: "Export File", filters: [{ name: "Rhythm Beatmap File", extensions: ["rbm"] }] });
-        showDialogPromise.then(function (result) {
+        console.log(require("electron"));
+        var ipcRenderer = require('electron').ipcRenderer;
+        ipcRenderer.once('saveRbm-reply', function (evt, filePath) {
+            console.log("file path is: ".concat(filePath));
+            fs.writeFile(filePath, _this.getContent(timestamps), function (err) {
+                if (err) {
+                    console.log("FUCKING ERROR");
+                    console.error(err);
+                    return;
+                }
+            });
+        });
+        ipcRenderer.on('saveRbm-reply', function (evt, filePath) {
+            console.log("file path is: ".concat(filePath));
+        });
+        ipcRenderer.send('saveRbm');
+        /*
+        let showDialogPromise = dialog.showSaveDialog({title: "Export File", filters:[{name:"Rhythm Beatmap File", extensions: ["rbm"]}]});
+        
+        showDialogPromise.then(result => {
             if (result.canceled) {
                 console.log("ERROR OMG OMG");
                 return;
             }
-            console.log("file path is: ".concat(result.filePath));
-            fs.writeFile(result.filePath + ".rbm", _this.getContent(timestamps), function (err) {
+            console.log(`file path is: ${result.filePath}`);
+            fs.writeFile(result.filePath+".rbm", this.getContent(timestamps), (err) => {
                 if (err) {
                     console.log("FUCKING ERROR");
                     return;
                 }
             });
         });
+        */
     };
     Export.getContent = function (timestamps) {
         var separator = ":";

@@ -11,9 +11,9 @@ var Transform_1 = require("../Transform");
 var GridElements_1 = require("../GridElements");
 var Input_1 = require("../Input");
 var Utils_1 = require("../Utils/Utils");
-var CreatableLinesModule_1 = require("./CreatableLinesModule");
 var Export_1 = require("../Export");
 var Command_1 = require("../Command");
+var Import_1 = require("../Import");
 var TimestampsModule = /** @class */ (function () {
     function TimestampsModule(editorGrid, creatableLines) {
         var _this = this;
@@ -27,6 +27,37 @@ var TimestampsModule = /** @class */ (function () {
         this.createableLinesModule = creatableLines;
         this.canvas = (0, jquery_1.default)("#editor-canvas")[0];
         (0, jquery_1.default)("#save-beatmap-btn").on("click", function (event) { return Export_1.Export.saveFile(_this.joinTimestampMap()); }); //Export.saveFile(this.timestamps));
+        (0, jquery_1.default)("#import-beatmap-btn").on("click", function (event) { return Import_1.Import.openFile(function (timestamps) {
+            _this.timestamps.forEach(function (value) {
+                value.forEach(function (timestamp) {
+                    timestamp.delete();
+                });
+            });
+            _this.timestamps.clear();
+            var connections = [];
+            var actualTimestamps = new Map();
+            timestamps.forEach(function (ts) {
+                _this.selectPrefab(ts.prefabId);
+                var timestamp = _this.createTimestampLocalPosition(new Vec2_1.Vec2(ts.timeInMillis / 1000, ts.lpbTrackId));
+                timestamp.id = ts.timestampId;
+                console.log(timestamp);
+                actualTimestamps.set(ts.timestampId, timestamp);
+                if (ts.longNote) {
+                    connections.push([ts.timestampId, ts.nextTimestampId]);
+                }
+            });
+            console.log("------ CONNECT");
+            connections.forEach(function (connection) {
+                try {
+                    var firstTimestamp = actualTimestamps.get(connection[0]);
+                    var secondTimestamp = actualTimestamps.get(connection[1]);
+                    firstTimestamp.connectToTimestamp(secondTimestamp);
+                }
+                catch (err) {
+                    console.error(err);
+                }
+            });
+        }); }); //Export.saveFile(this.timestamps));
         this.createTimestampPrefab(new RgbaColor_1.RgbaColor(0, 255, 26));
         this.createTimestampPrefab(new RgbaColor_1.RgbaColor(252, 236, 8));
         this.createTimestampPrefab(new RgbaColor_1.RgbaColor(8, 215, 252));
@@ -43,14 +74,14 @@ var TimestampsModule = /** @class */ (function () {
         var _this = this;
         this.editorCore = editorCoreModules;
         Input_1.Input.onMouseClickCanvas.addListener(function (event) { _this.onCanvasClick(event); });
-        CreatableLinesModule_1.CreatableLinesModule.onCreateLineEvent.addListener(function (_a) {
-            var line = _a[0], key = _a[1];
-            if (!key.includes("Digit"))
-                return;
-            console.log("CREATING STUFF");
-            console.log(parseInt(key[5]));
-            _this.createTimestamp(new Vec2_1.Vec2(line.transform.position.x, parseInt(key[5]) * _this.editorGridModule.distanceBetweenBeatLines()));
-        });
+        // CreatableLinesModule.onCreateLineEvent.addListener(([line, key]) => {
+        //     if (!key.includes("Digit"))
+        //         return;
+        //     console.log("CREATING STUFF");
+        //     console.log(parseInt(key[5]));
+        //     this.createTimestamp(new Vec2(line.transform.position.x,
+        //         parseInt(key[5]) * this.editorGridModule.distanceBetweenBeatLines()));
+        // });
     };
     TimestampsModule.prototype.updateModule = function () {
         var _this = this;
@@ -206,6 +237,32 @@ var TimestampsModule = /** @class */ (function () {
             return;
         this.createTimestamp(new Vec2_1.Vec2(closestObject.transform.position.x, closestBeatline.transform.position.y));
     };
+    TimestampsModule.prototype.createTimestampLocalPosition = function (position) {
+        var _this = this;
+        var prefab = this.idToPrefab.get(this.selectedPrefabId);
+        var newTimestamp = new GridElements_1.Timestamp(prefab, new Vec2_1.Vec2(position.x, position.y), this.editorGridModule.transform);
+        newTimestamp.transform.localPosition = position;
+        if (this.timestamps.get(newTimestamp.transform.localPosition.x) == undefined) {
+            this.timestamps.set(newTimestamp.transform.localPosition.x, new Map());
+            this.clapTimings.push(newTimestamp.transform.localPosition.x);
+            this.clapTimings.sort(function (a, b) { return a - b; });
+        }
+        if (this.timestamps.get(newTimestamp.transform.localPosition.x).get(newTimestamp.transform.localPosition.y) == null) {
+            this.timestamps.get(newTimestamp.transform.localPosition.x).set(newTimestamp.transform.localPosition.y, newTimestamp);
+            newTimestamp.id = this.idToTimestamp;
+            newTimestamp.onDelete.addListener(function (element) { _this.deleteTimestamp(element); });
+            newTimestamp.onRestore.addListener(function (element) { _this.restoreTimestamp(element); });
+            var createCommand = new Command_1.CreateElememtsCommand([newTimestamp]);
+            Command_1.CommandsController.executeCommand(createCommand);
+            this.idToTimestamp++;
+        }
+        else if (this.timestamps.get(newTimestamp.transform.localPosition.x).get(newTimestamp.transform.localPosition.y)
+            .prefab.prefabId != prefab.prefabId) {
+            this.timestamps.get(newTimestamp.transform.localPosition.x).get(newTimestamp.transform.localPosition.y).prefab = prefab;
+        }
+        this.editorCore.audio.setClapTimings(this.clapTimings);
+        return newTimestamp;
+    };
     TimestampsModule.prototype.createTimestamp = function (position) {
         var _this = this;
         var prefab = this.idToPrefab.get(this.selectedPrefabId);
@@ -229,6 +286,7 @@ var TimestampsModule = /** @class */ (function () {
             this.timestamps.get(newTimestamp.transform.localPosition.x).get(newTimestamp.transform.localPosition.y).prefab = prefab;
         }
         this.editorCore.audio.setClapTimings(this.clapTimings);
+        return newTimestamp;
     };
     TimestampsModule.nextPrefabId = 0;
     return TimestampsModule;

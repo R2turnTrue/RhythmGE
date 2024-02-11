@@ -11,6 +11,7 @@ import { CreatableLinesModule } from "./CreatableLinesModule";
 import { timeStamp } from 'node:console';
 import { Export } from '../Export';
 import { CommandsController, CreateElememtsCommand } from '../Command';
+import { Import } from '../Import';
 
 
 export class TimestampsModule implements IEditorModule {
@@ -34,6 +35,41 @@ export class TimestampsModule implements IEditorModule {
         this.createableLinesModule = creatableLines;
         this.canvas = $("#editor-canvas")[0] as HTMLCanvasElement;
         $("#save-beatmap-btn").on("click", event => Export.saveFile(this.joinTimestampMap()));//Export.saveFile(this.timestamps));
+        $("#import-beatmap-btn").on("click", event => Import.openFile((timestamps) => {
+            this.timestamps.forEach((value) => {
+                value.forEach((timestamp) => {
+                    timestamp.delete()
+                });
+            });
+            this.timestamps.clear()
+
+            const connections = []
+            const actualTimestamps = new Map()
+
+            timestamps.forEach(ts => {
+                this.selectPrefab(ts.prefabId)
+                const timestamp = this.createTimestampLocalPosition(new Vec2(ts.timeInMillis / 1000, ts.lpbTrackId))
+                timestamp.id = ts.timestampId
+                console.log(timestamp)
+                actualTimestamps.set(ts.timestampId, timestamp)
+                if (ts.longNote) {
+                    connections.push([ts.timestampId, ts.nextTimestampId])
+                }
+            });
+
+            console.log("------ CONNECT")
+
+            connections.forEach(connection => {
+                try {
+                    const firstTimestamp = actualTimestamps.get(connection[0])
+                    const secondTimestamp = actualTimestamps.get(connection[1])
+
+                    firstTimestamp.connectToTimestamp(secondTimestamp)
+                } catch (err) {
+                    console.error(err)
+                }
+            });
+        }));//Export.saveFile(this.timestamps));
 
         this.createTimestampPrefab(new RgbaColor(0, 255, 26));
         this.createTimestampPrefab(new RgbaColor(252, 236, 8));
@@ -54,16 +90,16 @@ export class TimestampsModule implements IEditorModule {
     init(editorCoreModules: IEditorCore) {
         this.editorCore = editorCoreModules;
         Input.onMouseClickCanvas.addListener((event) => { this.onCanvasClick(event); });
-        CreatableLinesModule.onCreateLineEvent.addListener(([line, key]) => {
-            if (!key.includes("Digit"))
-                return;
+        // CreatableLinesModule.onCreateLineEvent.addListener(([line, key]) => {
+        //     if (!key.includes("Digit"))
+        //         return;
 
-            console.log("CREATING STUFF");
-            console.log(parseInt(key[5]));
+        //     console.log("CREATING STUFF");
+        //     console.log(parseInt(key[5]));
 
-            this.createTimestamp(new Vec2(line.transform.position.x,
-                parseInt(key[5]) * this.editorGridModule.distanceBetweenBeatLines()));
-        });
+        //     this.createTimestamp(new Vec2(line.transform.position.x,
+        //         parseInt(key[5]) * this.editorGridModule.distanceBetweenBeatLines()));
+        // });
     }
 
     updateModule() {
@@ -250,8 +286,40 @@ export class TimestampsModule implements IEditorModule {
         this.createTimestamp(new Vec2(closestObject.transform.position.x, closestBeatline.transform.position.y));
     }
 
+    createTimestampLocalPosition(position: Vec2): Timestamp {
+        const prefab = this.idToPrefab.get(this.selectedPrefabId);
 
-    createTimestamp(position: Vec2) {
+        let newTimestamp = new Timestamp(prefab, new Vec2(position.x, position.y), this.editorGridModule.transform);
+        newTimestamp.transform.localPosition = position
+       
+        if (this.timestamps.get(newTimestamp.transform.localPosition.x) == undefined) {
+            this.timestamps.set(newTimestamp.transform.localPosition.x, new Map<number, Timestamp>());
+            this.clapTimings.push(newTimestamp.transform.localPosition.x);
+            this.clapTimings.sort((a, b) => { return a - b; });
+        }
+
+        if (this.timestamps.get(newTimestamp.transform.localPosition.x).get(newTimestamp.transform.localPosition.y) == null) {
+            this.timestamps.get(newTimestamp.transform.localPosition.x).set(newTimestamp.transform.localPosition.y, newTimestamp);
+            
+            newTimestamp.id = this.idToTimestamp;
+            newTimestamp.onDelete.addListener((element) => {this.deleteTimestamp(element as Timestamp);});
+            newTimestamp.onRestore.addListener((element) => {this.restoreTimestamp(element as Timestamp);});
+        
+            let createCommand = new CreateElememtsCommand([newTimestamp]);
+            CommandsController.executeCommand(createCommand);
+            this.idToTimestamp++;
+        }
+        else if (this.timestamps.get(newTimestamp.transform.localPosition.x).get(newTimestamp.transform.localPosition.y)
+            .prefab.prefabId != prefab.prefabId) {
+                this.timestamps.get(newTimestamp.transform.localPosition.x).get(newTimestamp.transform.localPosition.y).prefab = prefab;
+        }
+
+        this.editorCore.audio.setClapTimings(this.clapTimings);
+
+        return newTimestamp
+    }
+
+    createTimestamp(position: Vec2): Timestamp {
         const prefab = this.idToPrefab.get(this.selectedPrefabId);
 
         let newTimestamp = new Timestamp(prefab, new Vec2(position.x, position.y), this.editorGridModule.transform);
@@ -279,5 +347,7 @@ export class TimestampsModule implements IEditorModule {
         }
 
         this.editorCore.audio.setClapTimings(this.clapTimings);
+
+        return newTimestamp
     }
 }

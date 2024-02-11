@@ -76,11 +76,11 @@ var CreatableLinesModule = /** @class */ (function () {
         //if (Input.keysPressed["Space"] == true) {
         //    this.createCustomBpmLine("Space");
         //}
-        for (var i = 1; i <= 5; i++) {
-            if (Input_1.Input.keysPressed["Digit".concat(i)] == true) {
-                this.createCustomBpmLine("Digit".concat(i));
-            }
-        }
+        // for (let i = 1; i <= 5; i++) {
+        //     if (Input.keysPressed[`Digit${i}`] == true) {
+        //         this.createCustomBpmLine(`Digit${i}`);
+        //     }
+        // }
     };
     CreatableLinesModule.prototype.createCustomBpmLine = function (keyPressed) {
         var _this = this;

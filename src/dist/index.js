@@ -37,7 +37,17 @@ const createWindow = () => {
   ipcMain.on("openDialog", (event, arg) => {
     dialog.showOpenDialog(mainWindow, 
     {}).then(result => {
-        event.reply("openDialog-reply", fs.readFileSync(result.filePaths[0]));
+        event.reply("openDialog-reply", fs.readFileSync(result.filePaths[0], { encoding: 'utf-8' }));
+    })
+  })
+
+  ipcMain.on("saveRbm", (event, arg) => {
+    dialog.showSaveDialog(mainWindow, 
+    {
+      filters: [{ name: 'Text File', extensions: ['txt'] }]
+    }).then(result => {
+      console.log(result.filePath)
+      event.reply("saveRbm-reply", result.filePath);
     })
   })
 };

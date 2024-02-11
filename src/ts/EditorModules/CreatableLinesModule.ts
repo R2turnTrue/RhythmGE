@@ -95,11 +95,11 @@ export class CreatableLinesModule implements IEditorModule {
         //    this.createCustomBpmLine("Space");
         //}
         
-        for (let i = 1; i <= 5; i++) {
-            if (Input.keysPressed[`Digit${i}`] == true) {
-                this.createCustomBpmLine(`Digit${i}`);
-            }
-        }
+        // for (let i = 1; i <= 5; i++) {
+        //     if (Input.keysPressed[`Digit${i}`] == true) {
+        //         this.createCustomBpmLine(`Digit${i}`);
+        //     }
+        // }
     }
 
     private createCustomBpmLine(keyPressed: string) {
