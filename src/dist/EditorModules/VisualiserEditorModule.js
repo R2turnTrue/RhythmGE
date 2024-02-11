@@ -15,7 +15,7 @@ var VisualiserEditorModule = /** @class */ (function () {
         this.sampleRate = 48000;
         this.divideValue = 20;
         this.samplesPerArrayValue = this.sampleRate / this.divideValue;
-        this.canvas = jquery_1.default("#visualiser-canvas")[0];
+        this.canvas = (0, jquery_1.default)("#visualiser-canvas")[0];
         this.ctx = this.canvas.getContext("2d");
     }
     VisualiserEditorModule.prototype.init = function (editorCoreModules) {

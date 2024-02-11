@@ -125,6 +125,8 @@ export class AudioModule implements IAudioModule {
     private clappingTimings= new Array<number>();
     private clapTimingId = 0;
 
+    private currentVolume = 1.0;
+
     onAudioLoaded = new Event<[string, string]>();
     onLoad = new Event<number>();
     onSeek = new Event<number>();
@@ -194,7 +196,12 @@ export class AudioModule implements IAudioModule {
     }
 
     setVolume(value: number) {
+        this.currentVolume = value;
         this.songSource?.volume([value]);
+    }
+
+    getVolume() {
+        return this.currentVolume;
     }
 
     init(editorCoreModules: IEditorCore) {
@@ -233,6 +240,7 @@ export class AudioModule implements IAudioModule {
     }
     
     playClapSound() {
+        console.log("Play clap")
         this.clapSource?.stop();
         this.clapSoundId = this.clapSource?.play();
     }

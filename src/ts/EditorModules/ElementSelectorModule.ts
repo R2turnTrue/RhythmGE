@@ -10,7 +10,7 @@ import { EditorGrid } from './EditorGridModule';
 import { IEditorModule, IEditorCore, Editor } from '../Editor';
 import { CreatableLinesModule } from "./CreatableLinesModule";
 import { TimestampsModule } from "./TimestampsModule";
-import { CommandsController, DeleteElementsCommand, RemoveConnectionCommand, MoveElementsCommand, MakeConnectionCommand, DeselectAllElementsCommand, SelectElementsCommand } from '../Command';
+import { CommandsController, DeleteElementsCommand, RemoveConnectionCommand, MoveElementsCommand, MakeConnectionCommand, DeselectAllElementsCommand, SelectElementsCommand, CopyCommand, PasteCommand } from '../Command';
 import { RgbaColor } from '../Utils/RgbaColor';
 
 class SelectArea implements IDrawable {
@@ -62,12 +62,15 @@ class SelectArea implements IDrawable {
 
 export class ElementSelectorModule implements IEditorModule {
     transform = new Transform();
+    clipboardElements = new Array<GridElement>();
+    clipboardCopiedFrom = new Vec2(0.0, 0.0);
+    copyScale = new Vec2(0.0, 0.0)
 
-    private editor: IEditorCore;
+    editor: IEditorCore;
     private selectedElements = new Array<GridElement>();
     private selectArea: SelectArea;
     private grid: EditorGrid;
-    private timestamps: TimestampsModule;
+    timestamps: TimestampsModule;
     private creatable: CreatableLinesModule;
     private canvas: HTMLCanvasElement;
     
@@ -138,6 +141,18 @@ export class ElementSelectorModule implements IEditorModule {
         if (Input.keysPressed["Delete"]) {
             let deleteCommand = new DeleteElementsCommand(this.selectedElements, this);
             CommandsController.executeCommand(deleteCommand);
+        }
+        if (Input.keysPressed["ControlLeft"]) {
+            if (Input.keysPressed["KeyC"]) {
+                let copyCommand = new CopyCommand(this.selectedElements, this);
+                CommandsController.executeCommand(copyCommand);
+            }
+
+            if (Input.keysPressed["KeyV"]) {
+                let worldPos = this.editor.viewport.transform.canvasToWorld(new Vec2(Input.mousePosition.x - 20, Input.mousePosition.y));
+                let pasteCommand = new PasteCommand(this, this.grid.findClosestBpmLine(worldPos.x).transform.position);
+                CommandsController.executeCommand(pasteCommand);
+            }
         }
         if (Input.keysPressed["KeyF"]) {
             this.connectTimestamps();

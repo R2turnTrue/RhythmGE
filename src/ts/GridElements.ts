@@ -41,6 +41,8 @@ export abstract class GridElement implements IMoveable, IDrawable, ICompareNumbe
     
     transform: Transform = new Transform();
     color: RgbaColor;
+
+    positionWhenCopy: Vec2 = new Vec2(0.0, 0.0)
     
     onRestore = new Event<GridElement>();
     onDelete = new Event<GridElement>();

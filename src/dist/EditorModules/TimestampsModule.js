@@ -25,8 +25,8 @@ var TimestampsModule = /** @class */ (function () {
         this.idToTimestamp = 0;
         this.editorGridModule = editorGrid;
         this.createableLinesModule = creatableLines;
-        this.canvas = jquery_1.default("#editor-canvas")[0];
-        jquery_1.default("#save-beatmap-btn").on("click", function (event) { return Export_1.Export.saveFile(_this.joinTimestampMap()); }); //Export.saveFile(this.timestamps));
+        this.canvas = (0, jquery_1.default)("#editor-canvas")[0];
+        (0, jquery_1.default)("#save-beatmap-btn").on("click", function (event) { return Export_1.Export.saveFile(_this.joinTimestampMap()); }); //Export.saveFile(this.timestamps));
         this.createTimestampPrefab(new RgbaColor_1.RgbaColor(0, 255, 26));
         this.createTimestampPrefab(new RgbaColor_1.RgbaColor(252, 236, 8));
         this.createTimestampPrefab(new RgbaColor_1.RgbaColor(8, 215, 252));
@@ -124,7 +124,7 @@ var TimestampsModule = /** @class */ (function () {
         console.log(this.clapTimings[index]);
         var yArray = this.timestamps.get(this.clapTimings[index]);
         console.log(yArray);
-        console.log("index is " + index);
+        console.log("index is ".concat(index));
         var result = null;
         var min = 10000;
         yArray.forEach(function (timestamp) {
@@ -153,9 +153,9 @@ var TimestampsModule = /** @class */ (function () {
         if (yArr.size < 1) {
             this.timestamps.delete(timestamp.transform.localPosition.x);
             console.log("KEY IS DELETED");
-            console.log("Map size is: " + yArr.size);
+            console.log("Map size is: ".concat(yArr.size));
             this.clapTimings.splice(Utils_1.Utils.binaryNearestSearchNumber(this.clapTimings, timestamp.transform.localPosition.x, Utils_1.Func.Round), 1);
-            console.log("clap lenght: " + this.clapTimings.length);
+            console.log("clap lenght: ".concat(this.clapTimings.length));
         }
     };
     TimestampsModule.prototype.restoreTimestamp = function (timestamp) {

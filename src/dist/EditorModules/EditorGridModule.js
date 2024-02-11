@@ -18,7 +18,7 @@ var EditorGrid = /** @class */ (function () {
         this.transform = new Transform_1.Transform();
         this.beatLinesRange = new Vec2_1.Vec2(1, 20);
         this.bpmRange = new Vec2_1.Vec2(1, 10000);
-        this._canvas = jquery_1.default("#editor-canvas")[0];
+        this._canvas = (0, jquery_1.default)("#editor-canvas")[0];
         this.transform = new Transform_1.Transform();
         this.transform.localScale = new Vec2_1.Vec2(1, 1);
         //this.initGrid();

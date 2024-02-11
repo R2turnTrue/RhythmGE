@@ -91,9 +91,9 @@ export class CreatableLinesModule implements IEditorModule {
     }
 
     private handleInput() {
-        if (Input.keysPressed["Space"] == true) {
-            this.createCustomBpmLine("Space");
-        }
+        //if (Input.keysPressed["Space"] == true) {
+        //    this.createCustomBpmLine("Space");
+        //}
         
         for (let i = 1; i <= 5; i++) {
             if (Input.keysPressed[`Digit${i}`] == true) {

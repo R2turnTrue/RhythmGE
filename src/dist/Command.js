@@ -16,7 +16,9 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MoveElementsCommand = exports.CreateElememtsCommand = exports.DeleteElementsCommand = exports.DeselectAllElementsCommand = exports.DeselectElementsCommand = exports.SelectElementsCommand = exports.RemoveConnectionCommand = exports.MakeConnectionCommand = exports.CutCommand = exports.PasteCommand = exports.CopyCommand = exports.CommandsController = void 0;
+var GridElements_1 = require("./GridElements");
 var Input_1 = require("./Input");
+var Vec2_1 = require("./Utils/Vec2");
 var CommandsController = /** @class */ (function () {
     function CommandsController() {
     }
@@ -64,25 +66,71 @@ var CommandsController = /** @class */ (function () {
 }());
 exports.CommandsController = CommandsController;
 var CopyCommand = /** @class */ (function () {
-    function CopyCommand() {
+    function CopyCommand(gridElements, selector) {
+        this.gridElements = gridElements;
+        this.selector = selector;
     }
     CopyCommand.prototype.execute = function () {
-        throw new Error("Method not implemented.");
+        if (this.gridElements.length < 1) {
+            return;
+        }
+        console.log("Copy");
+        var clipboard = [];
+        var sortedElements = this.gridElements.sort(function (a, b) { return a.transform.position.x - b.transform.position.x; });
+        sortedElements.forEach(function (element) {
+            if (element instanceof GridElements_1.Timestamp) {
+                clipboard.push(element);
+                element.positionWhenCopy = element.transform.position;
+                element.deselect();
+            }
+        });
+        var firstElement = sortedElements[0];
+        if (firstElement !== undefined) {
+            this.selector.clipboardCopiedFrom = firstElement.transform.position;
+        }
+        this.selector.copyScale = this.selector.editor.transform.scale;
+        this.selector.deselectAll();
+        this.selector.clipboardElements = clipboard;
     };
     CopyCommand.prototype.undo = function () {
-        throw new Error("Method not implemented.");
     };
     return CopyCommand;
 }());
 exports.CopyCommand = CopyCommand;
 var PasteCommand = /** @class */ (function () {
-    function PasteCommand() {
+    function PasteCommand(selector, to) {
+        this.selector = selector;
+        this.to = to;
     }
     PasteCommand.prototype.execute = function () {
-        throw new Error("Method not implemented.");
+        var _this = this;
+        if (this.selector.clipboardElements.length < 1)
+            return;
+        var howMuchToMove = this.to.x - this.selector.clipboardCopiedFrom.x;
+        var currentScale = this.selector.editor.transform.scale;
+        var scaleFactor = new Vec2_1.Vec2(this.selector.editor.transform.scale.x / this.selector.copyScale.x, this.selector.editor.transform.scale.y / this.selector.copyScale.y);
+        console.log("Pasting ".concat(this.selector.clipboardElements.length, " elements to ").concat(howMuchToMove, "!"));
+        var i = 0;
+        var firstTimestampX = 0;
+        this.selector.clipboardElements.forEach(function (element) {
+            //element.restore()
+            //element.move(new Vec2(element.transform.localPosition.x + howManyCopied, element.transform.localPosition.y))
+            //element.transform.position = new Vec2(element.transform.position.x + howManyCopied, element.transform.position.y)
+            var afterX = element.positionWhenCopy.x + howMuchToMove;
+            if (i == 0) {
+                _this.selector.timestamps.createTimestamp(new Vec2_1.Vec2(afterX, element.positionWhenCopy.y));
+            }
+            else {
+                var distanceBetweenX = (afterX - firstTimestampX) * scaleFactor.x;
+                _this.selector.timestamps.createTimestamp(new Vec2_1.Vec2(firstTimestampX + distanceBetweenX, element.positionWhenCopy.y));
+            }
+            if (i == 0) {
+                firstTimestampX = element.positionWhenCopy.x + howMuchToMove;
+            }
+            i++;
+        });
     };
     PasteCommand.prototype.undo = function () {
-        throw new Error("Method not implemented.");
     };
     return PasteCommand;
 }());

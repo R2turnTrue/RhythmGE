@@ -99,6 +99,8 @@ export class Editor implements IEditorCore {
     private _editorModules = new Array<IEditorModule>();
     private _editorCanvas: HTMLCanvasElement;
 
+    isControllingAudioTime = false;
+
     constructor() {
         this._editorCanvas = $("#editor-canvas")[0] as HTMLCanvasElement;
         this.transform.scale = new Vec2(10, 1);
@@ -111,7 +113,8 @@ export class Editor implements IEditorCore {
         setInterval(() => {this.audio.checkForClaps();}, 5);
 
         Input.onWheelCanvas.addListener((event) => {this.onChangeScale((event.deltaY));});
-        Input.onMouseClickCanvas.addListener((event) => {this.onCanvasClick(event);});
+        Input.onMouseDownCanvas.addListener((event) => {this.onCanvasClick(event);});
+        Input.onMouseUp.addListener((event) => {this.onCanvasMouseUp(event);});
         
         this.update();
     }
@@ -136,12 +139,29 @@ export class Editor implements IEditorCore {
         }
 
         this._lastDrawable?.draw(this.viewport, this._editorCanvas);
+
+        if (this.isControllingAudioTime) {
+            this.audio.setMusicFromCanvasPosition(new Vec2(Input.mousePosition.x - 20, Input.mousePosition.y));
+        }
     }
 
-    private onCanvasClick(event: JQuery.ClickEvent) {
+    private oldVolume = 1.0;
+
+    private onCanvasClick(event: JQuery.MouseDownEvent) {
         const clickPos = new Vec2(event.offsetX, event.offsetY);
         if (clickPos.y < 10) {
-            this.audio.setMusicFromCanvasPosition(clickPos);
+            console.log("Canvas Mouse Down")
+            this.oldVolume = this.audio.getVolume();
+            this.audio.setVolume(0.0);
+            this.isControllingAudioTime = true
+        }
+    }
+
+    private onCanvasMouseUp(event: JQuery.MouseUpEvent) {
+        console.log("Canvas mouse up")
+        if (this.isControllingAudioTime) {
+            this.audio.setVolume(this.oldVolume);
+            this.isControllingAudioTime = false
         }
     }
 

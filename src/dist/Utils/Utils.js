@@ -10,7 +10,7 @@ var Func;
     Func[Func["Ceil"] = 0] = "Ceil";
     Func[Func["Floor"] = 1] = "Floor";
     Func[Func["Round"] = 2] = "Round";
-})(Func = exports.Func || (exports.Func = {}));
+})(Func || (exports.Func = Func = {}));
 var Utils = /** @class */ (function () {
     function Utils() {
     }
@@ -136,7 +136,7 @@ var Slider = /** @class */ (function () {
         this._maxValue = 100;
         this._minValue = 0;
         this.onValueChange = new Event();
-        this.sliderInput = jquery_1.default('#' + sliderId)[0];
+        this.sliderInput = (0, jquery_1.default)('#' + sliderId)[0];
         this.sliderInput.value = '0';
         this.sliderInput.oninput = function (event) {
             _this.value = event.target.value;

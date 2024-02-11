@@ -24,7 +24,7 @@ var Input = /** @class */ (function () {
         if (Input.initialized)
             return;
         Input.initialized = true;
-        jquery_1.default(window).on('resize', function (event) { return Input.onWindowResize.invoke(event); })
+        (0, jquery_1.default)(window).on('resize', function (event) { return Input.onWindowResize.invoke(event); })
             .on('keydown', function (event) { return Input.onCanvasKeyDown(event); })
             .on('keyup', function (event) { return Input.onCanvasKeyUp(event); })
             .on('mouseup', function (event) { return Input.onMouseUp.invoke(event); })
@@ -32,7 +32,7 @@ var Input = /** @class */ (function () {
             .on('mousedown', function (event) { return Input.onMouseDown.invoke(event); });
         //$(window).on('mousedown', (event) => { Input.onMouseDown.invoke(event);});
         //$(window).on('mouseup', (event) => {Input.onMouseUp.invoke(event)});
-        jquery_1.default('#editor-canvas').on('wheel', function (event) { return Input.onWheelCanvas.invoke(event.originalEvent); })
+        (0, jquery_1.default)('#editor-canvas').on('wheel', function (event) { return Input.onWheelCanvas.invoke(event.originalEvent); })
             .on('click', function (event) { Input.onMouseClickCanvas.invoke(event); Input.onMouseAfterCanvasClick.invoke(null); })
             .on('mousemove', function (event) { return Input.onCanvHover(event); })
             //.on('mouseup', (event) => {Input.onMouseUp.invoke(event)})

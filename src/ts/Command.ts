@@ -1,4 +1,5 @@
 import { CreatableLinesModule } from "./EditorModules/CreatableLinesModule";
+import { EditorGrid } from "./EditorModules/EditorGridModule";
 import { ElementSelectorModule } from "./EditorModules/ElementSelectorModule";
 import { TimestampsModule } from "./EditorModules/TimestampsModule";
 import { CreatableTimestampLine, GridElement, Timestamp } from "./GridElements";
@@ -63,21 +64,88 @@ export class CommandsController {
 }
 
 export class CopyCommand implements ICommand {
+    constructor 
+    (
+        private gridElements: Array<GridElement>,
+        private selector: ElementSelectorModule
+        ) {}
+   
     execute() {
-        throw new Error("Method not implemented.");
-    }
-    undo() {
-        throw new Error("Method not implemented.");
+        if (this.gridElements.length < 1) {
+            return
+        }
+
+        console.log("Copy")
+        const clipboard = []
+        const sortedElements = this.gridElements.sort((a, b) => a.transform.position.x - b.transform.position.x)
+        sortedElements.forEach((element) => {
+            if (element instanceof Timestamp) {
+                clipboard.push(element)
+                element.positionWhenCopy = element.transform.position
+                element.deselect();
+            }
+        });
+
+        const firstElement = sortedElements[0]
+
+        if (firstElement !== undefined) {
+            this.selector.clipboardCopiedFrom = firstElement.transform.position
+        }
+
+        this.selector.copyScale = this.selector.editor.transform.scale
+        this.selector.deselectAll();
+        this.selector.clipboardElements = clipboard
     }
 
+    undo() {
+    }
 }
 
 export class PasteCommand implements ICommand {
+    constructor 
+    (
+        private selector: ElementSelectorModule,
+        private to: Vec2
+        ) {}
+   
     execute() {
-        throw new Error("Method not implemented.");
+        if (this.selector.clipboardElements.length < 1)
+            return
+
+        let howMuchToMove = this.to.x - this.selector.clipboardCopiedFrom.x
+        const currentScale = this.selector.editor.transform.scale
+
+        const scaleFactor = new Vec2(
+            this.selector.editor.transform.scale.x / this.selector.copyScale.x,
+            this.selector.editor.transform.scale.y / this.selector.copyScale.y)
+
+        console.log(`Pasting ${this.selector.clipboardElements.length} elements to ${howMuchToMove}!`)
+
+        let i = 0
+        let firstTimestampX = 0
+
+        this.selector.clipboardElements.forEach((element) => {
+            //element.restore()
+            //element.move(new Vec2(element.transform.localPosition.x + howManyCopied, element.transform.localPosition.y))
+            //element.transform.position = new Vec2(element.transform.position.x + howManyCopied, element.transform.position.y)
+            let afterX = element.positionWhenCopy.x + howMuchToMove
+
+            if (i == 0) {
+                this.selector.timestamps.createTimestamp(new Vec2(afterX, element.positionWhenCopy.y))
+            } else {
+                let distanceBetweenX = (afterX - firstTimestampX) * scaleFactor.x
+
+                this.selector.timestamps.createTimestamp(new Vec2(firstTimestampX + distanceBetweenX, element.positionWhenCopy.y))
+            }
+
+            if (i == 0) {
+                firstTimestampX = element.positionWhenCopy.x + howMuchToMove
+            }
+            i++
+        })
     }
+
     undo() {
-        throw new Error("Method not implemented.");
     }
 }
 

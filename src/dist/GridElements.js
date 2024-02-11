@@ -28,6 +28,7 @@ var jquery_1 = __importDefault(require("jquery"));
 var GridElement = /** @class */ (function () {
     function GridElement(parent, rgbaColor) {
         this.transform = new Transform_1.Transform();
+        this.positionWhenCopy = new Vec2_1.Vec2(0.0, 0.0);
         this.onRestore = new Utils_1.Event();
         this.onDelete = new Utils_1.Event();
         this.onMoved = new Utils_1.Event();
@@ -107,10 +108,10 @@ var TimestampPrefab = /** @class */ (function () {
     });
     TimestampPrefab.prototype.createButton = function () {
         var _this = this;
-        var prefabsContainer = jquery_1.default('#prefabs-container');
-        this.buttonElement = jquery_1.default("<div>", { id: this.prefabId, "class": "prefab-button" });
-        this.diamondElement = jquery_1.default("<div>", { "class": "diamond-shape" });
-        this.diamondElement.attr("style", "background-color:" + this.color.value());
+        var prefabsContainer = (0, jquery_1.default)('#prefabs-container');
+        this.buttonElement = (0, jquery_1.default)("<div>", { id: this.prefabId, "class": "prefab-button" });
+        this.diamondElement = (0, jquery_1.default)("<div>", { "class": "diamond-shape" });
+        this.diamondElement.attr("style", "background-color:".concat(this.color.value()));
         this.buttonElement.append(this.diamondElement);
         prefabsContainer.append(this.buttonElement);
         this.buttonElement.on("click", function () {

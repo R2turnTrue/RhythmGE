@@ -16,7 +16,7 @@ var CreatableLinesModule = /** @class */ (function () {
     function CreatableLinesModule() {
         this.transform = new Transform_1.Transform();
         this.creatableLines = new Array();
-        this.canvas = jquery_1.default("#editor-canvas")[0];
+        this.canvas = (0, jquery_1.default)("#editor-canvas")[0];
     }
     CreatableLinesModule.prototype.init = function (editorCoreModules) {
         var _this = this;
@@ -73,12 +73,12 @@ var CreatableLinesModule = /** @class */ (function () {
         this.creatableLines.sort(function (a, b) { return a.transform.position.x - b.transform.position.x; });
     };
     CreatableLinesModule.prototype.handleInput = function () {
-        if (Input_1.Input.keysPressed["Space"] == true) {
-            this.createCustomBpmLine("Space");
-        }
+        //if (Input.keysPressed["Space"] == true) {
+        //    this.createCustomBpmLine("Space");
+        //}
         for (var i = 1; i <= 5; i++) {
-            if (Input_1.Input.keysPressed["Digit" + i] == true) {
-                this.createCustomBpmLine("Digit" + i);
+            if (Input_1.Input.keysPressed["Digit".concat(i)] == true) {
+                this.createCustomBpmLine("Digit".concat(i));
             }
         }
     };

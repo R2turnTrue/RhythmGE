@@ -13,7 +13,7 @@ var TimestepLineModule = /** @class */ (function () {
     function TimestepLineModule() {
         this.transform = new Transform_1.Transform();
         this.timestepLine = new GridElements_1.TimestepLine(this.transform, AppSettings_1.editorColorSettings.timestepLineColor);
-        this.canvas = jquery_1.default("#editor-canvas")[0];
+        this.canvas = (0, jquery_1.default)("#editor-canvas")[0];
     }
     TimestepLineModule.prototype.init = function (editorCoreModules) {
         var _this = this;

@@ -251,7 +251,7 @@ export class TimestampsModule implements IEditorModule {
     }
 
 
-    private createTimestamp(position: Vec2) {
+    createTimestamp(position: Vec2) {
         const prefab = this.idToPrefab.get(this.selectedPrefabId);
 
         let newTimestamp = new Timestamp(prefab, new Vec2(position.x, position.y), this.editorGridModule.transform);

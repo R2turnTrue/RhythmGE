@@ -23,12 +23,12 @@ var AudioPlayerView = /** @class */ (function () {
         this.onVolumeSliderChange = new Utils_1.Event();
         this.onPlayButtonClick = new Utils_1.Event();
         this.audioController = audio;
-        this.audioFileName = jquery_1.default('#file-name')[0];
-        this.audioCurrentTime = jquery_1.default('#current-audio-time')[0];
-        this.audioDuration = jquery_1.default('#audio-duration')[0];
+        this.audioFileName = (0, jquery_1.default)('#file-name')[0];
+        this.audioCurrentTime = (0, jquery_1.default)('#current-audio-time')[0];
+        this.audioDuration = (0, jquery_1.default)('#audio-duration')[0];
         this.volumeSlider.value = 1;
         this.volumeSlider.onValueChange.addListener(function (value) { _this.onVolumeSliderChange.invoke(value); });
-        jquery_1.default('#play-button').on('click', function (event) { _this.onPlayClick(event.target); });
+        (0, jquery_1.default)('#play-button').on('click', function (event) { _this.onPlayClick(event.target); });
     }
     AudioPlayerView.prototype.onAudioLoad = function (fileName, duration) {
         this.audioFileName.innerHTML = fileName;
@@ -72,6 +72,7 @@ var AudioModule = /** @class */ (function () {
         this.view = new AudioPlayerView(this);
         this.clappingTimings = new Array();
         this.clapTimingId = 0;
+        this.currentVolume = 1.0;
         this.onAudioLoaded = new Utils_1.Event();
         this.onLoad = new Utils_1.Event();
         this.onSeek = new Utils_1.Event();
@@ -135,7 +136,11 @@ var AudioModule = /** @class */ (function () {
     };
     AudioModule.prototype.setVolume = function (value) {
         var _a;
+        this.currentVolume = value;
         (_a = this.songSource) === null || _a === void 0 ? void 0 : _a.volume([value]);
+    };
+    AudioModule.prototype.getVolume = function () {
+        return this.currentVolume;
     };
     AudioModule.prototype.init = function (editorCoreModules) {
         var _this = this;
@@ -173,6 +178,7 @@ var AudioModule = /** @class */ (function () {
     };
     AudioModule.prototype.playClapSound = function () {
         var _a, _b;
+        console.log("Play clap");
         (_a = this.clapSource) === null || _a === void 0 ? void 0 : _a.stop();
         this.clapSoundId = (_b = this.clapSource) === null || _b === void 0 ? void 0 : _b.play();
     };
@@ -217,7 +223,7 @@ var AudioAmplitudeViewModule = /** @class */ (function () {
         this.sampleRate = 48000;
         this.divideValue = 20;
         this.samplesPerArrayValue = this.sampleRate / this.divideValue;
-        this.canvas = jquery_1.default('#audio-amplitude-canvas')[0];
+        this.canvas = (0, jquery_1.default)('#audio-amplitude-canvas')[0];
         this.ctx = this.canvas.getContext('2d');
     }
     AudioAmplitudeViewModule.prototype.onWindowResize = function () {

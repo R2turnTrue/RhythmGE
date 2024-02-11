@@ -3,12 +3,13 @@ import * as fs from "fs";
 import $ from "jquery";
 
 import { Timestamp } from "./GridElements";
-const dialog = require("electron").remote.dialog as Dialog;
 
 export abstract class Export {
     static saveFile(timestamps: Array<Timestamp>) {
         if (timestamps == null || timestamps.length < 1)
             return;
+
+        const dialog = (require("electron") as any).remote.dialog as Dialog;
 
         let showDialogPromise = dialog.showSaveDialog({title: "Export File", filters:[{name:"Rhythm Beatmap File", extensions: ["rbm"]}]});
         

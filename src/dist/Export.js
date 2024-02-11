@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -21,7 +25,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Export = void 0;
 var fs = __importStar(require("fs"));
-var dialog = require("electron").remote.dialog;
 var Export = /** @class */ (function () {
     function Export() {
     }
@@ -29,13 +32,14 @@ var Export = /** @class */ (function () {
         var _this = this;
         if (timestamps == null || timestamps.length < 1)
             return;
+        var dialog = require("electron").remote.dialog;
         var showDialogPromise = dialog.showSaveDialog({ title: "Export File", filters: [{ name: "Rhythm Beatmap File", extensions: ["rbm"] }] });
         showDialogPromise.then(function (result) {
             if (result.canceled) {
                 console.log("ERROR OMG OMG");
                 return;
             }
-            console.log("file path is: " + result.filePath);
+            console.log("file path is: ".concat(result.filePath));
             fs.writeFile(result.filePath + ".rbm", _this.getContent(timestamps), function (err) {
                 if (err) {
                     console.log("FUCKING ERROR");

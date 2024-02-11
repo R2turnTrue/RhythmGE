@@ -32,7 +32,7 @@ var TopScale = /** @class */ (function (_super) {
     function TopScale(width) {
         var _this = _super.call(this, width) || this;
         _this.transform = new Transform_1.Transform();
-        _this.canvas = jquery_1.default("#editor-canvas")[0];
+        _this.canvas = (0, jquery_1.default)("#editor-canvas")[0];
         return _this;
     }
     TopScale.prototype.init = function (editorCoreModules) {

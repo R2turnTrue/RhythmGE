@@ -1,8 +1,12 @@
 "use strict";
-var __spreadArray = (this && this.__spreadArray) || function (to, from) {
-    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
-        to[j] = from[i];
-    return to;
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
 };
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -23,7 +27,7 @@ var SelectArea = /** @class */ (function () {
         this.firstPoint = new Vec2_1.Vec2(0, 0);
         this.secondPoint = new Vec2_1.Vec2(0, 0);
         this.onSelect = new Utils_1.Event();
-        this.canvas = jquery_1.default("#editor-canvas")[0];
+        this.canvas = (0, jquery_1.default)("#editor-canvas")[0];
         Input_1.Input.onMouseDownCanvas.addListener(function (event) { _this.onMouseDown(event); });
         Input_1.Input.onMouseUp.addListener(function (event) { _this.onMouseUp(event); });
         Input_1.Input.onHoverWindow.addListener(function (event) { _this.onMouseMove(event); });
@@ -58,11 +62,14 @@ var SelectArea = /** @class */ (function () {
 var ElementSelectorModule = /** @class */ (function () {
     function ElementSelectorModule(grid, creatable, timestamps) {
         this.transform = new Transform_1.Transform();
+        this.clipboardElements = new Array();
+        this.clipboardCopiedFrom = new Vec2_1.Vec2(0.0, 0.0);
+        this.copyScale = new Vec2_1.Vec2(0.0, 0.0);
         this.selectedElements = new Array();
         this.grid = grid;
         this.creatable = creatable;
         this.timestamps = timestamps;
-        this.canvas = jquery_1.default("#editor-canvas")[0];
+        this.canvas = (0, jquery_1.default)("#editor-canvas")[0];
     }
     ElementSelectorModule.prototype.init = function (editorCoreModules) {
         var _this = this;
@@ -116,6 +123,17 @@ var ElementSelectorModule = /** @class */ (function () {
             var deleteCommand = new Command_1.DeleteElementsCommand(this.selectedElements, this);
             Command_1.CommandsController.executeCommand(deleteCommand);
         }
+        if (Input_1.Input.keysPressed["ControlLeft"]) {
+            if (Input_1.Input.keysPressed["KeyC"]) {
+                var copyCommand = new Command_1.CopyCommand(this.selectedElements, this);
+                Command_1.CommandsController.executeCommand(copyCommand);
+            }
+            if (Input_1.Input.keysPressed["KeyV"]) {
+                var worldPos = this.editor.viewport.transform.canvasToWorld(new Vec2_1.Vec2(Input_1.Input.mousePosition.x - 20, Input_1.Input.mousePosition.y));
+                var pasteCommand = new Command_1.PasteCommand(this, this.grid.findClosestBpmLine(worldPos.x).transform.position);
+                Command_1.CommandsController.executeCommand(pasteCommand);
+            }
+        }
         if (Input_1.Input.keysPressed["KeyF"]) {
             this.connectTimestamps();
         }
@@ -153,7 +171,7 @@ var ElementSelectorModule = /** @class */ (function () {
         var selectedLines = this.creatable.getLinesInRange(pointA, pointB);
         var selectedTimestamps = this.timestamps.getTimestampsAtRange(pointA, pointB);
         if (!Input_1.Input.keysPressed["ShiftLeft"]) {
-            var deselectAllCommand = new Command_1.DeselectAllElementsCommand(__spreadArray([], this.selectedElements), this);
+            var deselectAllCommand = new Command_1.DeselectAllElementsCommand(__spreadArray([], this.selectedElements, true), this);
             Command_1.CommandsController.executeCommand(deselectAllCommand);
         }
         if (selectedLines != null)
@@ -178,7 +196,7 @@ var ElementSelectorModule = /** @class */ (function () {
             if (this.selectedElements.length > 0) {
                 Input_1.Input.onMouseClickCanvas.preventFiringEventOnce();
             }
-            var deselectAllCommnad = new Command_1.DeselectAllElementsCommand(__spreadArray([], this.selectedElements), this);
+            var deselectAllCommnad = new Command_1.DeselectAllElementsCommand(__spreadArray([], this.selectedElements, true), this);
             Command_1.CommandsController.executeCommand(deselectAllCommnad);
             return;
         }

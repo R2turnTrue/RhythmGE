@@ -17,7 +17,7 @@ exports.editorColorSettings = new /** @class */ (function () {
         this.snapBpmLineColor = new RgbaColor_1.RgbaColor(201, 124, 40, 0.8); //(74, 189, 166);
         this.oneFourthLineColor = new RgbaColor_1.RgbaColor(35, 184, 107, 0.7);
         this.oneEighthLineColor = new RgbaColor_1.RgbaColor(32, 181, 189, 0.6);
-        this.oneSixteenLineColor = new RgbaColor_1.RgbaColor(189, 56, 32, 0.5);
+        this.oneSixteenLineColor = new RgbaColor_1.RgbaColor(32, 74, 189, 0.5);
     }
     return EditorColorSettings;
 }());

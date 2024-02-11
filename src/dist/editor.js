@@ -29,14 +29,14 @@ var EditorData = /** @class */ (function () {
         this.snapValue = new Utils_1.EventVar(0);
         this.playbackRate = new Utils_1.EventVar(1);
         this.audioFile = new Utils_1.EventVar(null);
-        jquery_1.default('#files').on('change', function (event) { _this.onAudioLoad(event); });
-        jquery_1.default('#follow-line').on('change', function (event) { _this.followLine.value = event.target.checked; });
-        jquery_1.default('#use-claps').on('change', function (event) { _this.useClaps.value = event.target.checked; });
-        jquery_1.default('#hide-bpm').on('change', function (event) { _this.hideBpmLines.value = event.target.checked; });
-        jquery_1.default('#hide-creatable').on('change', function (event) { _this.hideCreatableLines.value = event.target.checked; });
-        jquery_1.default('#beat-lines').on('change', function (event) { _this.beatLinesCount.value = parseInt(event.target.value); });
-        jquery_1.default('#bpm').on('change', function (event) { _this.bpmValue.value = parseInt(event.target.value); });
-        jquery_1.default('#offset').on('change', function (event) { _this.offset.value = parseInt(event.target.value); });
+        (0, jquery_1.default)('#files').on('change', function (event) { _this.onAudioLoad(event); });
+        (0, jquery_1.default)('#follow-line').on('change', function (event) { _this.followLine.value = event.target.checked; });
+        (0, jquery_1.default)('#use-claps').on('change', function (event) { _this.useClaps.value = event.target.checked; });
+        (0, jquery_1.default)('#hide-bpm').on('change', function (event) { _this.hideBpmLines.value = event.target.checked; });
+        (0, jquery_1.default)('#hide-creatable').on('change', function (event) { _this.hideCreatableLines.value = event.target.checked; });
+        (0, jquery_1.default)('#beat-lines').on('change', function (event) { _this.beatLinesCount.value = parseInt(event.target.value); });
+        (0, jquery_1.default)('#bpm').on('change', function (event) { _this.bpmValue.value = parseInt(event.target.value); });
+        (0, jquery_1.default)('#offset').on('change', function (event) { _this.offset.value = parseInt(event.target.value); });
         this._playbackSpeedSlider.value = 1;
         this._snapSlider.value = 0;
         this._playbackSpeedSlider.onValueChange.addListener(function (value) { _this.onPlaybackRateValueChange(value); });
@@ -49,12 +49,12 @@ var EditorData = /** @class */ (function () {
         console.log(files[0]);
     };
     EditorData.prototype.onPlaybackRateValueChange = function (value) {
-        jquery_1.default('#playback-rate-text')[0].innerText = 'Playback rate ' + value.toString() + 'x';
+        (0, jquery_1.default)('#playback-rate-text')[0].innerText = 'Playback rate ' + value.toString() + 'x';
         this.playbackRate.value = value;
     };
     EditorData.prototype.onSnapSliderValueChange = function (value) {
         value = Math.pow(2, value);
-        jquery_1.default('#snap-lines-text')[0].innerText = 'Snap lines 1/' + value.toString();
+        (0, jquery_1.default)('#snap-lines-text')[0].innerText = 'Snap lines 1/' + value.toString();
         this.snapValue.value = value;
     };
     return EditorData;
@@ -68,7 +68,9 @@ var Editor = /** @class */ (function () {
         this.editorData = new EditorData();
         this.audio = new AudioModules_1.AudioModule();
         this._editorModules = new Array();
-        this._editorCanvas = jquery_1.default("#editor-canvas")[0];
+        this.isControllingAudioTime = false;
+        this.oldVolume = 1.0;
+        this._editorCanvas = (0, jquery_1.default)("#editor-canvas")[0];
         this.transform.scale = new Vec2_1.Vec2(10, 1);
         this.viewport.init(this);
         this.audio.init(this);
@@ -76,7 +78,8 @@ var Editor = /** @class */ (function () {
         this.audio.transform.parent = this.transform;
         setInterval(function () { _this.audio.checkForClaps(); }, 5);
         Input_1.Input.onWheelCanvas.addListener(function (event) { _this.onChangeScale((event.deltaY)); });
-        Input_1.Input.onMouseClickCanvas.addListener(function (event) { _this.onCanvasClick(event); });
+        Input_1.Input.onMouseDownCanvas.addListener(function (event) { _this.onCanvasClick(event); });
+        Input_1.Input.onMouseUp.addListener(function (event) { _this.onCanvasMouseUp(event); });
         this.update();
     }
     Editor.prototype.addLastDrawableElement = function (element) {
@@ -96,11 +99,24 @@ var Editor = /** @class */ (function () {
             this._editorModules[i].updateModule();
         }
         (_a = this._lastDrawable) === null || _a === void 0 ? void 0 : _a.draw(this.viewport, this._editorCanvas);
+        if (this.isControllingAudioTime) {
+            this.audio.setMusicFromCanvasPosition(new Vec2_1.Vec2(Input_1.Input.mousePosition.x - 20, Input_1.Input.mousePosition.y));
+        }
     };
     Editor.prototype.onCanvasClick = function (event) {
         var clickPos = new Vec2_1.Vec2(event.offsetX, event.offsetY);
         if (clickPos.y < 10) {
-            this.audio.setMusicFromCanvasPosition(clickPos);
+            console.log("Canvas Mouse Down");
+            this.oldVolume = this.audio.getVolume();
+            this.audio.setVolume(0.0);
+            this.isControllingAudioTime = true;
+        }
+    };
+    Editor.prototype.onCanvasMouseUp = function (event) {
+        console.log("Canvas mouse up");
+        if (this.isControllingAudioTime) {
+            this.audio.setVolume(this.oldVolume);
+            this.isControllingAudioTime = false;
         }
     };
     Editor.prototype.onChangeScale = function (mouseDelta) {

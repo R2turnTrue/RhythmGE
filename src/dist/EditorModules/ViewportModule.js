@@ -13,7 +13,7 @@ var ViewportModule = /** @class */ (function () {
         var _this = this;
         this.transform = new Transform_1.Transform();
         this.maxDeviation = new Vec2_1.Vec2(10, 100);
-        this._canvas = jquery_1.default("#editor-canvas")[0];
+        this._canvas = (0, jquery_1.default)("#editor-canvas")[0];
         this.transform.parent = parent;
         this.transform.position = new Vec2_1.Vec2(100, 0);
         Input_1.Input.onWheelCanvas.addListener(function (event) { _this.onCanvasScroll(event); });
