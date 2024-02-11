@@ -136,13 +136,38 @@ var PasteCommand = /** @class */ (function () {
 }());
 exports.PasteCommand = PasteCommand;
 var CutCommand = /** @class */ (function () {
-    function CutCommand() {
+    function CutCommand(gridElements, selector) {
+        this.gridElements = gridElements;
+        this.selector = selector;
     }
     CutCommand.prototype.execute = function () {
-        throw new Error("Method not implemented.");
+        if (this.gridElements.length < 1) {
+            return;
+        }
+        console.log("Copy");
+        var clipboard = [];
+        var sortedElements = this.gridElements.sort(function (a, b) { return a.transform.position.x - b.transform.position.x; });
+        sortedElements.forEach(function (element) {
+            if (element instanceof GridElements_1.Timestamp) {
+                clipboard.push(element);
+                element.positionWhenCopy = element.transform.position;
+                element.delete(); // added
+                element.deselect();
+            }
+        });
+        var firstElement = sortedElements[0];
+        if (firstElement !== undefined) {
+            this.selector.clipboardCopiedFrom = firstElement.transform.position;
+        }
+        this.selector.copyScale = this.selector.editor.transform.scale;
+        this.selector.deselectAll();
+        this.selector.clipboardElements = clipboard;
     };
     CutCommand.prototype.undo = function () {
-        throw new Error("Method not implemented.");
+        this.gridElements.forEach(function (element) {
+            element.restore();
+        });
+        this.selector.setSelectedElements(this.gridElements);
     };
     return CutCommand;
 }());
@@ -275,12 +300,12 @@ var MoveElementsCommand = /** @class */ (function () {
             _this.lastPositions.push(element.transform.position);
         });
         for (var i = 0; i < this.movedElements.length; i++) {
-            this.movedElements[i].move(this.newPositions[i]);
+            this.movedElements[i].transform.localPosition = this.newPositions[i];
         }
     };
     MoveElementsCommand.prototype.undo = function () {
         for (var i = 0; i < this.movedElements.length; i++) {
-            this.movedElements[i].move(this.lastPositions[i]);
+            this.movedElements[i].transform.localPosition = this.lastPositions[i];
         }
     };
     return MoveElementsCommand;

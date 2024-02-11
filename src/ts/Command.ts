@@ -150,13 +150,46 @@ export class PasteCommand implements ICommand {
 }
 
 export class CutCommand implements ICommand {
+    constructor 
+    (
+        private gridElements: Array<GridElement>,
+        private selector: ElementSelectorModule
+        ) {}
+   
     execute() {
-        throw new Error("Method not implemented.");
-    }
-    undo() {
-        throw new Error("Method not implemented.");
+        if (this.gridElements.length < 1) {
+            return
+        }
+
+        console.log("Copy")
+        const clipboard = []
+        const sortedElements = this.gridElements.sort((a, b) => a.transform.position.x - b.transform.position.x)
+        sortedElements.forEach((element) => {
+            if (element instanceof Timestamp) {
+                clipboard.push(element)
+                element.positionWhenCopy = element.transform.position
+                element.delete(); // added
+                element.deselect();
+            }
+        });
+
+        const firstElement = sortedElements[0]
+
+        if (firstElement !== undefined) {
+            this.selector.clipboardCopiedFrom = firstElement.transform.position
+        }
+
+        this.selector.copyScale = this.selector.editor.transform.scale
+        this.selector.deselectAll();
+        this.selector.clipboardElements = clipboard
     }
 
+    undo() {
+        this.gridElements.forEach((element) => {
+           element.restore();
+        });
+        this.selector.setSelectedElements(this.gridElements);
+    }
 }
 
 export class MakeConnectionCommand implements ICommand {
@@ -281,13 +314,13 @@ export class MoveElementsCommand implements ICommand{
             this.lastPositions.push(element.transform.position);
         });
         for(let i = 0; i<this.movedElements.length; i++) {
-            this.movedElements[i].move(this.newPositions[i]);
+            this.movedElements[i].transform.localPosition = this.newPositions[i];
         }
     }
 
     undo() {
         for(let i = 0; i<this.movedElements.length; i++) {
-            this.movedElements[i].move(this.lastPositions[i]);
+            this.movedElements[i].transform.localPosition = this.lastPositions[i];
         }
     }
 

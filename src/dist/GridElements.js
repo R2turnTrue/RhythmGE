@@ -228,7 +228,12 @@ var Timestamp = /** @class */ (function (_super) {
         var ctx = canvas.getContext('2d');
         var pos = new Vec2_1.Vec2(this.transform.position.x + view.position.x, this.transform.position.y + view.position.y);
         var width = this.getWidth();
-        ctx.fillStyle = color.value();
+        try {
+            ctx.fillStyle = color.value();
+        }
+        catch (_a) {
+            ctx.fillStyle = '#ff0000';
+        }
         ctx.beginPath();
         ctx.moveTo(pos.x - width, pos.y);
         ctx.lineTo(pos.x, pos.y - width);

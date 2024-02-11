@@ -74,7 +74,7 @@ var ElementSelectorModule = /** @class */ (function () {
     ElementSelectorModule.prototype.init = function (editorCoreModules) {
         var _this = this;
         this.editor = editorCoreModules;
-        Input_1.Input.onHoverWindow.addListener(function (event) { return _this.elementMovingHandle(event); });
+        Input_1.Input.onHoverCanvas.addListener(function (event) { return _this.elementMovingHandle(event); });
         Input_1.Input.onMouseUp.addListener(function (event) { return _this.onMouseUp(event); });
         Input_1.Input.onMouseClickCanvas.addListener(function (event) { return _this.onCanvasClick(event); });
         Input_1.Input.onMouseAfterCanvasClick.addListener(function () { return Input_1.Input.onMouseClickCanvas.allowFiring(); });
@@ -127,6 +127,10 @@ var ElementSelectorModule = /** @class */ (function () {
             if (Input_1.Input.keysPressed["KeyC"]) {
                 var copyCommand = new Command_1.CopyCommand(this.selectedElements, this);
                 Command_1.CommandsController.executeCommand(copyCommand);
+            }
+            if (Input_1.Input.keysPressed["KeyX"]) {
+                var cutCommand = new Command_1.CutCommand(this.selectedElements, this);
+                Command_1.CommandsController.executeCommand(cutCommand);
             }
             if (Input_1.Input.keysPressed["KeyV"]) {
                 var worldPos = this.editor.viewport.transform.canvasToWorld(new Vec2_1.Vec2(Input_1.Input.mousePosition.x - 20, Input_1.Input.mousePosition.y));
@@ -205,16 +209,20 @@ var ElementSelectorModule = /** @class */ (function () {
     };
     ElementSelectorModule.prototype.onMouseDownCanvas = function (event) {
         if (event.button == 0) {
+            console.log('move handle');
             this.elementMovingStartHandle(event);
         }
     };
     ElementSelectorModule.prototype.elementMovingStartHandle = function (event) {
-        if (this.selectedElements.length != 1)
+        return;
+        if (this.selectedElements.length < 1)
             return;
         var worldClickPos = this.editor.viewport.transform.canvasToWorld(new Vec2_1.Vec2(event.offsetX, event.offsetY));
         var closestElement = this.selectedElements[0];
+        console.log('letsgo move -1');
         if (!closestElement.isSelected || Vec2_1.Vec2.Distance(worldClickPos, closestElement.transform.position) > 20)
             return;
+        console.log('letsgo move');
         this.movingElement = closestElement;
         this.selectArea.isActive = false;
         this.isMoving = true;
@@ -222,6 +230,7 @@ var ElementSelectorModule = /** @class */ (function () {
     ElementSelectorModule.prototype.elementMovingHandle = function (event) {
         if (!this.isMoving)
             return;
+        console.log("im moving...");
         var worldPos = this.editor.viewport.transform.canvasToWorld(new Vec2_1.Vec2(event.offsetX, event.offsetY));
         var color = Object.assign(this.movingElement);
         color.r = 0.6;

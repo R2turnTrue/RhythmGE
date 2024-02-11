@@ -261,7 +261,11 @@ export class Timestamp extends GridElement {
 
         let width = this.getWidth();
 
-        ctx.fillStyle = color.value();
+        try {
+            ctx.fillStyle = color.value();
+        } catch {
+            ctx.fillStyle = '#ff0000'
+        }
         ctx.beginPath();
         ctx.moveTo(pos.x - width, pos.y);
         ctx.lineTo(pos.x, pos.y - width);

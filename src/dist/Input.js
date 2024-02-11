@@ -35,6 +35,7 @@ var Input = /** @class */ (function () {
         (0, jquery_1.default)('#editor-canvas').on('wheel', function (event) { return Input.onWheelCanvas.invoke(event.originalEvent); })
             .on('click', function (event) { Input.onMouseClickCanvas.invoke(event); Input.onMouseAfterCanvasClick.invoke(null); })
             .on('mousemove', function (event) { return Input.onCanvHover(event); })
+            //.on('mousemove', event => Input.onMouseMove.invoke(event))
             //.on('mouseup', (event) => {Input.onMouseUp.invoke(event)})
             .on('mousedown', function (event) { return Input.onMouseDownCanvas.invoke(event); })
             .on('mouseover', function (event) { return Input.onMouseOverCanvas.invoke(event); });
@@ -92,6 +93,7 @@ var Input = /** @class */ (function () {
     Input.onKeyUp = new Utils_1.Event();
     Input.onKeyDown = new Utils_1.Event();
     Input.onMouseUp = new Utils_1.Event();
+    Input.onMouseMove = new Utils_1.Event();
     Input.onMouseDown = new Utils_1.Event();
     Input.onMouseOverCanvas = new Utils_1.Event();
     Input.onMouseDownCanvas = new Utils_1.Event();

@@ -10,7 +10,7 @@ import { EditorGrid } from './EditorGridModule';
 import { IEditorModule, IEditorCore, Editor } from '../Editor';
 import { CreatableLinesModule } from "./CreatableLinesModule";
 import { TimestampsModule } from "./TimestampsModule";
-import { CommandsController, DeleteElementsCommand, RemoveConnectionCommand, MoveElementsCommand, MakeConnectionCommand, DeselectAllElementsCommand, SelectElementsCommand, CopyCommand, PasteCommand } from '../Command';
+import { CommandsController, DeleteElementsCommand, RemoveConnectionCommand, MoveElementsCommand, MakeConnectionCommand, DeselectAllElementsCommand, SelectElementsCommand, CopyCommand, PasteCommand, CutCommand } from '../Command';
 import { RgbaColor } from '../Utils/RgbaColor';
 
 class SelectArea implements IDrawable {
@@ -86,7 +86,7 @@ export class ElementSelectorModule implements IEditorModule {
 
     init(editorCoreModules: IEditorCore) {
         this.editor = editorCoreModules;
-        Input.onHoverWindow.addListener(event => this.elementMovingHandle(event));
+        Input.onHoverCanvas.addListener(event => this.elementMovingHandle(event));
         Input.onMouseUp.addListener(event => this.onMouseUp(event));
         Input.onMouseClickCanvas.addListener(event => this.onCanvasClick(event));
         Input.onMouseAfterCanvasClick.addListener(() => Input.onMouseClickCanvas.allowFiring());
@@ -146,6 +146,11 @@ export class ElementSelectorModule implements IEditorModule {
             if (Input.keysPressed["KeyC"]) {
                 let copyCommand = new CopyCommand(this.selectedElements, this);
                 CommandsController.executeCommand(copyCommand);
+            }
+
+            if (Input.keysPressed["KeyX"]) {
+                let cutCommand = new CutCommand(this.selectedElements, this);
+                CommandsController.executeCommand(cutCommand);
             }
 
             if (Input.keysPressed["KeyV"]) {
@@ -241,20 +246,26 @@ export class ElementSelectorModule implements IEditorModule {
 
     private onMouseDownCanvas(event: JQuery.MouseDownEvent) {
         if (event.button == 0) {
+            console.log('move handle')
             this.elementMovingStartHandle(event);
         }
     }
 
     private elementMovingStartHandle(event: JQuery.MouseDownEvent) {
-        if (this.selectedElements.length != 1)
+        return
+
+        if (this.selectedElements.length < 1)
             return;
 
         let worldClickPos = this.editor.viewport.transform.canvasToWorld(new Vec2(event.offsetX, event.offsetY));
         let closestElement = this.selectedElements[0];
+
+        console.log('letsgo move -1')
         
         if (!closestElement.isSelected || Vec2.Distance(worldClickPos, closestElement.transform.position) > 20)
             return;
 
+        console.log('letsgo move')
         this.movingElement = closestElement;
         this.selectArea.isActive = false;
         this.isMoving = true;
@@ -263,6 +274,8 @@ export class ElementSelectorModule implements IEditorModule {
     private elementMovingHandle(event: JQuery.MouseMoveEvent) {
         if (!this.isMoving)
             return;
+
+        console.log("im moving...")
 
         let worldPos = this.editor.viewport.transform.canvasToWorld(new Vec2(event.offsetX, event.offsetY));
         let color = Object.assign(this.movingElement) as RgbaColor;
